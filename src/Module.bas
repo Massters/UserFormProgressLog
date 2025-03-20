@@ -1,4 +1,4 @@
-Attribute VB_Name = "模块1"
+Attribute VB_Name = "Module"
 Option Explicit
 
 ' 模拟文件处理函数 - 外部可调用
@@ -22,6 +22,6 @@ Public Sub ShowFileProcessor()
 End Sub
 
 ' 工作簿打开时自动显示处理器
-Public Sub Auto_Open()
+Private Sub Auto_Open()
     ShowFileProcessor
 End Sub

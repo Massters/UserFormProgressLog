@@ -1,69 +1,172 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} FileProcessorForm 
    Caption         =   "UserForm1"
-   ClientHeight    =   8090
+   ClientHeight    =   9930.001
    ClientLeft      =   110
    ClientTop       =   450
    ClientWidth     =   25390
    OleObjectBlob   =   "FileProcessorForm.frx":0000
-   StartUpPosition =   1  '所有者中心
+   StartUpPosition =   2  '屏幕中心
 End
 Attribute VB_Name = "FileProcessorForm"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+'@IgnoreModule AssignmentNotUsed
+'@Folder FileProcessorForm
 Option Explicit
 
-' 模拟文件处理函数 - 实际使用时替换为真实的处理逻辑
-Private Sub MockFileProc(filePath As String, sheetName As String)
-    ' 模拟工作表处理时间
-    Application.Wait Now + TimeSerial(0, 0, 1)
-    
-    ' 随机生成错误（10%概率）
-    If Rnd() < 0.1 Then
-        Err.Raise vbObjectError + 1000, "MockFileProc", "模拟处理错误"
-    End If
-End Sub
+Private totalFiles As Long
 
-' 表单初始化
+'表单初始化
 Private Sub UserForm_Initialize()
-    ' 设置表单位置到屏幕中央
-    Me.StartUpPosition = 0 ' 手动
-    Me.Caption = "Excel文件处理工具"
-    Me.Left = Application.Left + (Application.Width - Me.Width) / 2
-    Me.Top = Application.Top + (Application.Height - Me.Height) / 2
-        
-    ' 将Excel窗口移动到屏幕外
+    ' 初始化窗体
+    InitializeForm
+    
     MoveWindowOffScreen
+    ' 设置随机数生成器
+    Randomize
 End Sub
 
-' 表单关闭事件
-Private Sub UserForm_Terminate()
-    ' 恢复Excel窗口到原始位置
-'    RestoreWindowPosition
-    ThisWorkbook.Close savechanges:=False
-End Sub
-
-' 将Excel窗口移动到屏幕外
-Private Sub MoveWindowOffScreen()
-    With Application
-        .WindowState = xlNormal
-        .Left = 10000 ' 移到屏幕左侧外
-        .Top = 0
+' 初始化窗体设计和位置
+Private Sub InitializeForm()
+    ' 设置窗体基本属性
+    Me.Caption = "Excel文件批量处理工具"
+    Me.BackColor = RGB(240, 240, 240)
+    
+    ' 设置窗体大小
+    Me.Width = 500
+    Me.Height = 400
+    
+    ' 设置标题标签
+    With lblTitle
+        .Caption = "Excel文件批量处理工具"
+        .Font.Name = "微软雅黑"
+        .Font.Bold = True
+        .Font.Size = 14
+        .ForeColor = RGB(30, 55, 153)
+        .BackColor = RGB(240, 240, 240)
+        .Top = 15
+        .Left = 15
+        .Width = 400
+        .Height = 30
+        .AutoSize = False
     End With
+    
+    ' 设置文件选择按钮
+    With btnSelect
+        .Caption = "选择文件"
+        .Font.Name = "微软雅黑"
+        .Font.Size = 10
+        .Top = 60
+        .Left = 15
+        .Width = 90
+        .Height = 30
+        .BackColor = RGB(30, 55, 153)
+        .ForeColor = RGB(255, 255, 255)
+    End With
+    
+    ' 设置文件路径文本框
+    With txtFilePath
+        .Font.Name = "微软雅黑"
+        .Font.Size = 9
+        .Top = 100
+        .Left = 15
+        .Width = Me.Width - 40
+        .Height = 80
+        .MultiLine = True
+        .ScrollBars = fmScrollBarsVertical
+        .BackColor = RGB(250, 250, 250)
+        .BorderColor = RGB(200, 200, 200)
+    End With
+    
+    ' 设置开始处理按钮
+    With btnStart
+        .Caption = "开始处理"
+        .Font.Name = "微软雅黑"
+        .Font.Size = 10
+        .Top = 190
+        .Left = 15
+        .Width = 90
+        .Height = 30
+        .BackColor = RGB(46, 125, 50)
+        .ForeColor = RGB(255, 255, 255)
+    End With
+    
+    ' 设置进度信息标签
+    With lblProgressInfo
+        .Caption = "处理进度"
+        .Font.Name = "微软雅黑"
+        .Font.Bold = True
+        .Font.Size = 10
+        .ForeColor = RGB(50, 50, 50)
+        .BackColor = RGB(240, 240, 240)
+        .Top = 190
+        .Left = 120
+        .Width = 200
+        .Height = 20
+        .AutoSize = False
+    End With
+    
+    ' 设置进度信息文本框
+    With txtProgress
+        .Font.Name = "Consolas"
+        .Font.Size = 9
+        .Top = 230
+        .Left = 15
+        .Width = Me.Width - 40
+        .Height = 120
+        .MultiLine = True
+        .ScrollBars = fmScrollBarsVertical
+        .BackColor = RGB(250, 250, 250)
+        .BorderColor = RGB(200, 200, 200)
+    End With
+    
+    ' 设置状态标签
+    With lblStatus
+        .Caption = "就绪"
+        .Font.Name = "微软雅黑"
+        .Font.Size = 9
+        .ForeColor = RGB(100, 100, 100)
+        .BackColor = RGB(240, 240, 240)
+        .Top = Me.Height - 40
+        .Left = 15
+        .Width = 200
+        .Height = 20
+        .AutoSize = False
+    End With
+    
+    ' 设置关于按钮
+    With btnAbout
+        .Caption = "关于"
+        .Font.Name = "微软雅黑"
+        .Font.Size = 9
+        .Top = Me.Height - 50
+        .Left = Me.Width - 70
+        .Width = 50
+        .Height = 20
+        .BackColor = RGB(150, 150, 150)
+        .ForeColor = RGB(255, 255, 255)
+    End With
+    
+    ' 设置窗体在屏幕中央（多屏幕环境）
+    CenterFormOnScreen
 End Sub
 
-' 恢复Excel窗口到原始位置
-Private Sub RestoreWindowPosition()
-    Application.WindowState = xlMaximized
+
+' 将窗体居中显示在主显示器的工作区域
+Private Sub CenterFormOnScreen()
+    Me.StartUpPosition = 2 ' CenterScreen
 End Sub
+
 
 ' 选择文件按钮点击事件
 Private Sub btnSelect_Click()
     Dim fileDialog As fileDialog
     Dim selectedItem As Variant
     Dim filePaths As String
+    
     
     ' 创建文件对话框
     Set fileDialog = Application.fileDialog(msoFileDialogFilePicker)
@@ -85,9 +188,13 @@ Private Sub btnSelect_Click()
             
             ' 更新文件路径文本框（移除最后一个换行符）
             If Len(filePaths) > 0 Then
-                filePaths = Left(filePaths, Len(filePaths) - Len(vbCrLf))
+                filePaths = Left$(filePaths, Len(filePaths) - Len(vbCrLf))
             End If
             txtFilePath.Text = filePaths
+            
+            ' 更新状态
+            totalFiles = UBound(Split(filePaths, vbCrLf)) + 1
+            lblStatus.Caption = "已选择 " & totalFiles & " 个文件，等待处理"
         End If
     End With
     
@@ -104,12 +211,12 @@ Private Sub btnStart_Click()
     Dim wb As Workbook
     Dim ws As Worksheet
     Dim errorMessage As String
-    Dim currentWb As Workbook
     Dim result As String
     Dim originalCalculation As XlCalculation
-    
-    ' 保存当前工作簿的引用
-    Set currentWb = ThisWorkbook
+    Dim timeElapsed As String
+    Dim processedFiles As Long
+    Dim totalProcessingStartTime As Date
+    Dim fileProcessingStartTime As Date
     
     ' 保存当前的计算模式
     originalCalculation = Application.Calculation
@@ -118,17 +225,28 @@ Private Sub btnStart_Click()
     txtProgress.Text = ""
     
     ' 如果没有选择文件，则退出
-    If Trim(txtFilePath.Text) = "" Then
-        MsgBox "请先选择文件！", vbExclamation
+    If Trim$(txtFilePath.Text) = "" Then
+        MsgBox "请先选择文件！", vbExclamation, "提示"
         Exit Sub
     End If
     
     ' 分割文件路径
     filePaths = Split(txtFilePath.Text, vbCrLf)
     
+    ' 设置处理变量
+    totalFiles = UBound(filePaths) + 1
+
+    processedFiles = 0
+    totalProcessingStartTime = Now
+    
     ' 禁用按钮，防止重复点击
     btnSelect.Enabled = False
     btnStart.Enabled = False
+    
+    ' 更新状态标签
+    lblStatus.Caption = "处理中...(0/" & totalFiles & ")"
+    lblStatus.ForeColor = RGB(0, 120, 215)
+    Me.Repaint
     
     ' 优化性能设置
     Application.ScreenUpdating = False
@@ -141,13 +259,19 @@ Private Sub btnStart_Click()
     
     ' 处理每个文件
     For i = 0 To UBound(filePaths)
-        filePath = Trim(filePaths(i))
+        filePath = Trim$(filePaths(i))
+        processedFiles = i + 1
+        fileProcessingStartTime = Now
         
         ' 获取文件名（不含路径）
-        fileName = Mid(filePath, InStrRev(filePath, "\") + 1)
+        fileName = Mid$(filePath, InStrRev(filePath, "\") + 1)
         
-        ' 更新进度信息
-        AppendProgressInfo fileName
+        ' 更新进度信息和状态
+        lblStatus.Caption = "处理中...(" & processedFiles & "/" & totalFiles & ")"
+        Me.Repaint
+        
+        ' 添加文件标题（带编号）
+        AppendProgressInfo "【" & processedFiles & "/" & totalFiles & "】处理文件: " & fileName
         
         ' 尝试打开文件
         On Error Resume Next
@@ -157,7 +281,7 @@ Private Sub btnStart_Click()
         If Err.Number <> 0 Then
             ' 记录文件打开错误
             errorMessage = "Error: " & Err.Description
-            AppendProgressInfo String(8, ".") & errorMessage
+            AppendProgressInfo "  └─ " & errorMessage
             
             Err.Clear
             On Error GoTo 0
@@ -177,20 +301,35 @@ Private Sub btnStart_Click()
                     result = "Error: " & Err.Description
                     Err.Clear
                 Else
-                    result = "Done"
+                    result = "完成"
                 End If
                 On Error GoTo 0
                 
                 ' 直接输出最终状态（不显示ing状态）
-                AppendProgressInfo "    " & ws.Name & String(8, ".") & result
+                AppendProgressInfo "  ├─ " & ws.Name & "..." & result
             Next ws
             
+            ' 显示文件处理时间
+            timeElapsed = Format$(Now - fileProcessingStartTime, "hh:mm:ss")
+            AppendProgressInfo "  └─ 耗时: " & timeElapsed
+            
             ' 关闭工作簿
-            wb.Close savechanges:=False
+            wb.Close SaveChanges:=False
         End If
         
         Set wb = Nothing
+        
+        ' 添加一个空行分隔不同的文件
+        If i < UBound(filePaths) Then
+            AppendProgressInfo ""
+        End If
     Next i
+    
+    ' 显示总处理时间
+    timeElapsed = Format$(Now - totalProcessingStartTime, "hh:mm:ss")
+    AppendProgressInfo ""
+    AppendProgressInfo "======================="
+    AppendProgressInfo "全部处理完成！总耗时: " & timeElapsed
     
     ' 恢复原始设置
     Application.ScreenUpdating = True
@@ -198,14 +337,16 @@ Private Sub btnStart_Click()
     Application.DisplayAlerts = True
     Application.Calculation = originalCalculation
     
+    ' 更新状态标签
+    lblStatus.Caption = "处理完成 - 共 " & totalFiles & " 个文件"
+    lblStatus.ForeColor = RGB(46, 125, 50)
+    
     ' 启用按钮
     btnSelect.Enabled = True
     btnStart.Enabled = True
     
-    ' 确保窗体在前面
-'    Me.SetFocus
-    
-    MsgBox "所有文件处理完成！", vbInformation
+    ' 提示完成
+    MsgBox "所有文件处理完成！" & vbCrLf & "总耗时: " & timeElapsed, vbInformation, "处理完成"
 End Sub
 
 ' 追加进度信息
@@ -216,8 +357,61 @@ Private Sub AppendProgressInfo(info As String)
     ' 滚动到最后一行
     txtProgress.SelStart = Len(txtProgress.Text)
     
-    ' 更新界面
+    ' 更新界面使用Repaint
     Me.Repaint
-'    DoEvents
 End Sub
+
+' 关于按钮点击事件
+Private Sub btnAbout_Click()
+    MsgBox "Excel文件批量处理工具 v1.0" & vbCrLf & _
+           "---------------------------" & vbCrLf & _
+           "Copyright ? 2025" & vbCrLf & _
+           "一个专业的Excel文件批处理工具，" & vbCrLf & _
+           "可以批量打开并处理多个Excel文件。" & vbCrLf & _
+           vbCrLf & _
+           "使用说明：" & vbCrLf & _
+           "1. 点击【选择文件】选择要处理的Excel文件" & vbCrLf & _
+           "2. 点击【开始处理】开始批量处理" & vbCrLf & _
+           "3. 处理完成后会显示详细结果", _
+           vbInformation, "关于"
+End Sub
+
+' 表单关闭事件 - 处理表单关闭前的确认
+Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
+    ' 如果是用户点击X关闭
+    If CloseMode = vbFormControlMenu Then
+        ' 显示确认对话框
+        Dim response As Long
+        response = MsgBox("确定要退出应用程序吗？", vbQuestion + vbYesNoCancel, "确认")
+        
+        ' 除非明确点击"是"，否则取消关闭
+        If response <> vbYes Then
+            Cancel = True ' 取消关闭
+        End If
+    End If
+End Sub
+
+' 表单关闭事件
+Private Sub UserForm_Terminate()
+    ' 关闭工作簿
+    ThisWorkbook.Close SaveChanges:=False
+    RestoreWindowPosition
+End Sub
+
+
+' 恢复Excel窗口到原始位置
+Private Sub RestoreWindowPosition()
+    Application.WindowState = xlMaximized
+End Sub
+
+
+' 将Excel窗口移动到屏幕外
+Private Sub MoveWindowOffScreen()
+    With Application
+        .WindowState = xlNormal
+        .Left = 10000 ' 移到屏幕左侧外
+        .Top = 0
+    End With
+End Sub
+
 

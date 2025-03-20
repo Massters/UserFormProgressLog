@@ -1,0 +1,48 @@
+要求:
+1. 主要需求:完成进度信息的更新
+2. 首先要可以点击Select按钮(ActiveX控件)在文件浏览器中选择文件,支持多选
+3. 选择文件后,需要将文件路径显示在一处(目前为ActiveX控件TxtFilePath中)(使用换行符分隔多个文件)
+4. 点击Start按钮(ActiveX控件)后,根据txtfilepath中的文件列表依次处理文件(处理文件过程用MockFileProc来模拟)
+5. 由于处理文件时有打开文件的操作,所以需要妥善管理屏幕更新等
+6. 在处理文件前,需要更新进度信息,格式为: sheet........ing, sheet........done, sheet........error:xxxxx等
+7. 由于读取文件时可能无法打开文件,所以也可以直接在文件后(而不是sheet名后)显示信息,例如: ExcelA.xlsx........error:xxxxxxx
+8. 注意进度信息是随着文件处理而更新的,不是在打开文件时读取所有Sheet名,而是在处理一个Sheet前输出ing,处理后输出Done
+9. 处理文件时,如果发生错误,需要记录错误信息,并在进度信息中显示出来
+10. 若进度信息的更新无法保证控件能正确刷新(可能因为screenupdate等原因无法正常刷新),可以考虑写入到UserForm中
+ 但是需要保证UserForm的位置大小合适且美观
+11. 可以考虑存在2个文本框(其中一个为txtFilePath,另一个为txtProgress),一个按钮(Start),一个按钮(Select),其中txtFilePath为文件路径的输入信息,txtProgress为进度信息,Start为开始处理文件的按钮
+    Select为选择文件的按钮
+12. 必须保证txtprogress或UserForm能随着文件处理而实时更新进度信息
+13. 程序可以连续运行,并在下一次运行前清除Log信息(即上次txtprogress中的信息)
+14. 最后的效果可能如下: 
+    txtFilePath: 
+    ```
+    C:\Users\user\Desktop\test1.xlsx
+    C:\Users\user\Desktop\test2.xlsx
+    C:\Users\user\Desktop\test3.xlsx
+    ```
+
+    txtProgress:
+    ```
+    test1.xlsx
+        Sheet1........Done
+        Sheet2........Done
+        Sheet3........Done
+        Sheet4........Error:xxxxx
+        Sheet5........Done
+    test2.xlsx........Error:xxxxx
+    test3.xlsx
+        Sheet1........Done
+        Sheet2........Done
+    ```
+
+请考虑：
+- 错误处理
+- 边缘情况
+- 性能优化
+- 语言/框架 的最佳实践
+请不要不必要地删除任何注释或代码。
+生成带有清晰注释的代码，解释逻辑。
+
+' 更新界面
+Application.SendKeys " " ' 一个小技巧，用于强制ActiveX控件更新

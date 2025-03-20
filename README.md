@@ -1,0 +1,2 @@
+# UserFormProgressLog
+批量处理Excel文件,并在UserForm中显示处理进度等信息
